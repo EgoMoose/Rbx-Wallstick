@@ -3,24 +3,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayerScripts = game:GetService("StarterPlayer"):WaitForChild("StarterPlayerScripts")
 local StarterCharacterScripts = game:GetService("StarterPlayer"):WaitForChild("StarterCharacterScripts")
 
-local PlayerScriptsLoader = script:WaitForChild("PlayerScriptsLoader")
-local foundPlayerScriptsLoader = StarterPlayerScripts:FindFirstChild("PlayerScriptsLoader")
-
-if foundPlayerScriptsLoader then
-	-- destroy the loader if it already exists
-	foundPlayerScriptsLoader:Destroy()
+local function replace(child, parent)
+	local found = parent:FindFirstChild(child.Name)
+	if found then found:Destroy() end
+	child.Parent = parent
 end
 
-PlayerScriptsLoader.Parent = StarterPlayerScripts
-
-local Animate = script:WaitForChild("Animate")
-local foundAnimate = StarterCharacterScripts:FindFirstChild("Animate")
-
-if foundAnimate then
-	foundAnimate:Destroy()
-end
-
-Animate.Parent = StarterCharacterScripts
+replace(script:WaitForChild("PlayerScriptsLoader"), StarterPlayerScripts)
+replace(script:WaitForChild("RbxCharacterSounds"), StarterPlayerScripts)
+replace(script:WaitForChild("Animate"), StarterCharacterScripts)
 
 local defaultGroup = PhysicsService:GetCollisionGroupName(0)
 local characterGroup = "WallstickCharacters"

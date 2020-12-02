@@ -31,6 +31,8 @@ end
 local CameraModule = PlayerModule:WaitForChild("CameraModule")
 
 local UserSettings = require(script:WaitForChild("FakeUserSettings"))
+local UserGameSettings = UserSettings():GetService("UserGameSettings")
+
 local FFlagUserCameraToggle = UserSettings():SafeIsUserFeatureEnabled("UserCameraToggle")
 local FFlagUserCameraInputRefactor = UserSettings():SafeIsUserFeatureEnabled("UserCameraInputRefactor3")
 
@@ -86,6 +88,15 @@ end
 
 function BaseCamera:CalculateNewLookCFrame(suppliedLookVector)
 	return self:CalculateNewLookCFrameFromArg(suppliedLookVector, self.rotateInput)
+end
+
+local defaultUpdateMouseBehavior = BaseCamera.UpdateMouseBehavior
+
+function BaseCamera:UpdateMouseBehavior()
+	defaultUpdateMouseBehavior(self)
+	if UserGameSettings.RotationType == Enum.RotationType.CameraRelative then
+		UserGameSettings.RotationType = Enum.RotationType.MovementRelative
+	end
 end
 
 -- Camera Module
@@ -160,9 +171,14 @@ function Camera:Update(dt)
 		calculateUpCFrame(self)
 		calculateSpinCFrame(self)
 
+		local lockOffset = Vector3.new(0, 0, 0)
+		if self.activeMouseLockController and self.activeMouseLockController:GetIsMouseLocked() then
+			lockOffset = self.activeMouseLockController:GetMouseLockOffset()
+		end
+
 		local offset = newCameraFocus:ToObjectSpace(newCameraCFrame)
 		local camRotation = upCFrame * twistCFrame * offset
-		newCameraFocus = newCameraFocus -- TODO: shift lock offsets
+		newCameraFocus = newCameraFocus - newCameraCFrame:VectorToWorldSpace(lockOffset) + camRotation:VectorToWorldSpace(lockOffset)
 		newCameraCFrame = newCameraFocus * camRotation
 
 		if self.activeCameraController.lastCameraTransform then

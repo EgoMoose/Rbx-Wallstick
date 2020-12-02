@@ -27,7 +27,7 @@ function WallstickClass.new(player)
 	self.Character = player.Character
 	self.Humanoid = player.Character:WaitForChild("Humanoid")
 	self.HRP = self.Humanoid.RootPart
-	self.Physics = Physics.new(player)
+	self.Physics = Physics.new(self)
 
 	self._camera = Camera.new(self)
 	self._control = Control.new(self)
@@ -63,6 +63,7 @@ local function generalStep(self, dt)
 	end
 
 	self.Physics:MatchHumanoid(self.Humanoid)
+	self.Physics:UpdateGyro()
 	self._camera:SetUpVector(self.Part.CFrame:VectorToWorldSpace(self.Normal))
 end
 
@@ -208,7 +209,7 @@ function WallstickClass:Set(part, normal, teleportCF)
 	physicsHRP.RotVelocity = physicsHRP.CFrame:VectorToWorldSpace(rotVel)
 
 	self._camera:SetSpinPart(part)
-	
+
 	if self.Mode == "Debug" then
 		camera.CFrame = self.Physics.HRP.CFrame:ToWorldSpace(cameraOffset)
 		camera.Focus = self.Physics.HRP.CFrame:ToWorldSpace(focusOffset)

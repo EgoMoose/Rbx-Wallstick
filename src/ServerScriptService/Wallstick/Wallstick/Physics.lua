@@ -18,6 +18,7 @@ local CONSTANTS = require(script.Parent:WaitForChild("Constants"))
 local ZERO3 = Vector3.new(0, 0, 0)
 local UNIT_X = Vector3.new(1, 0, 0)
 local UNIT_Y = Vector3.new(0, 1, 0)
+local VEC_XZ = Vector3.new(1, 0, 1)
 
 -- Class
 
@@ -25,8 +26,10 @@ local PhysicsClass = {}
 PhysicsClass.__index = PhysicsClass
 PhysicsClass.ClassName = "Physics"
 
-function PhysicsClass.new(player)
+function PhysicsClass.new(wallstick)
 	local self = setmetatable({}, PhysicsClass)
+
+	self.Wallstick = wallstick
 
 	self.World = Instance.new("Model")
 	self.World.Name = "PhysicsWorld"
@@ -38,10 +41,14 @@ function PhysicsClass.new(player)
 
 	self.Floor = nil
 	
-	self.Character = stripCopyCharacter(player.Character)
+	self.Character = stripCopyCharacter(wallstick.Player.Character)
 	self.Humanoid = self.Character:WaitForChild("Humanoid")
 	self.HRP = self.Humanoid.RootPart
 	
+	self.Gyro = Instance.new("BodyGyro")
+	self.Gyro.MaxTorque = Vector3.new(100000, 100000, 100000)
+	self.Gyro.P = 25000
+
 	self.Character.Parent = self.World
 
 	return self
@@ -94,6 +101,17 @@ function PhysicsClass:MatchHumanoid(humanoid)
 	self.Humanoid.Jump = humanoid.Jump
 end
 
+function PhysicsClass:UpdateGyro()
+	local cameraCF = workspace.CurrentCamera.CFrame
+	local isRelative = self.Wallstick._camera.CameraModule:IsCamRelative()
+
+	local physicsHRPCF = self.Wallstick.Physics.HRP.CFrame
+	local physicsCameraCF = physicsHRPCF * self.Wallstick.HRP.CFrame:ToObjectSpace(cameraCF)
+
+	self.Gyro.CFrame = CFrame.lookAt(physicsHRPCF.p, physicsHRPCF.p + physicsCameraCF.LookVector * VEC_XZ)
+	self.Gyro.Parent = isRelative and self.Wallstick.Physics.HRP or nil
+end
+
 function PhysicsClass:UpdateFloor(prevPart, newPart, prevNormal, newNormal)
 	if self.Floor then
 		self.Floor:Destroy()
@@ -124,6 +142,7 @@ end
 
 function PhysicsClass:Destroy()
 	self.World:Destroy()
+	self.Gyro:Destroy()
 end
 
 --

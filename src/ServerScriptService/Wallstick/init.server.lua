@@ -10,7 +10,7 @@ local function replace(child, parent)
 end
 
 replace(script:WaitForChild("PlayerScriptsLoader"), StarterPlayerScripts)
-replace(script:WaitForChild("RbxCharacterSounds"), StarterPlayerScripts)
+--replace(script:WaitForChild("RbxCharacterSounds"), StarterPlayerScripts)
 replace(script:WaitForChild("Animate"), StarterCharacterScripts)
 
 local defaultGroup = PhysicsService:GetCollisionGroupName(0)

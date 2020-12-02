@@ -8,6 +8,7 @@ local ZERO3 = Vector3.new(0, 0, 0)
 local UNIT_Y = Vector3.new(0, 1, 0)
 
 local Maid = require(script:WaitForChild("Maid"))
+local Signal = require(script:WaitForChild("Signal"))
 local Camera = require(script:WaitForChild("Camera"))
 local Control = require(script:WaitForChild("Control"))
 local Physics = require(script:WaitForChild("Physics"))
@@ -33,8 +34,12 @@ function WallstickClass.new(player)
 	self._camera = Camera.new(self)
 	self._control = Control.new(self)
 	self._animation = Animation.new(self)
+
 	self._collisionParts = {}
-	self._maid = Maid.new()
+	self._fallStart = 0
+
+	self.Maid = Maid.new()
+	self.Falling = Signal.new()
 
 	self.Part = nil
 	self.Normal = UNIT_Y
@@ -56,8 +61,6 @@ local function setCollisionGroupId(array, id)
 end
 
 local function generalStep(self, dt)
-	self.HRP.Velocity = ZERO3
-	self.HRP.RotVelocity = ZERO3
 	self.HRP.CFrame = self.Part.CFrame * self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
 
 	if not self.Part.Parent then
@@ -152,6 +155,25 @@ local function characterStep(self, dt)
 	else
 		self.Physics.Humanoid:Move(move, true)
 	end
+
+	local floorCF = self.Physics.Floor.CFrame
+	self.HRP.Velocity = self.Part.CFrame:VectorToWorldSpace(floorCF:VectorToObjectSpace(self.Physics.HRP.Velocity))
+	self.HRP.RotVelocity = self.Part.CFrame:VectorToWorldSpace(floorCF:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
+
+	for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
+		if enum ~= Enum.HumanoidStateType.None then
+			self.Humanoid:SetStateEnabled(enum, false)
+		end
+	end
+
+	local targetState = self.Physics.Humanoid:GetState()
+	self.Humanoid:SetStateEnabled(targetState, true)
+	self.Humanoid:ChangeState(targetState)
+
+	if targetState == Enum.HumanoidStateType.Freefall then
+		local height = self.Physics.HRP.Position.y
+		self.Falling:Fire(height, self._fallStart - height)
+	end
 end
 
 function init(self)
@@ -160,18 +182,34 @@ function init(self)
 	self:SetMode(CONSTANTS.DEFAULT_CAMERA_MODE)
 	self:Set(workspace.Terrain, UNIT_Y)
 
-	self._maid:Mark(self._camera)
-	self._maid:Mark(self._control)
-	self._maid:Mark(self._animation)
-	self._maid:Mark(self.Physics)
+	self.Maid:Mark(self._camera)
+	self.Maid:Mark(self._control)
+	self.Maid:Mark(self._animation)
+	self.Maid:Mark(self.Physics)
 
-	self._maid:Mark(self.Humanoid.Died:Connect(function()
+	self.Maid:Mark(self.Physics.Humanoid.Died:Connect(function()
 		self:Destroy()
 	end))
 
-	self._maid:Mark(self.Character.AncestryChanged:Connect(function(_, parent)
+	self.Maid:Mark(self.Physics.Character.AncestryChanged:Connect(function(_, parent)
 		if not parent then
 			self:Destroy()
+		end
+	end))
+
+	self.Maid:Mark(self.Humanoid.Died:Connect(function()
+		self:Destroy()
+	end))
+
+	self.Maid:Mark(self.Character.AncestryChanged:Connect(function(_, parent)
+		if not parent then
+			self:Destroy()
+		end
+	end))
+
+	self.Maid:Mark(self.Physics.Humanoid.StateChanged:Connect(function(_, new)
+		if new == Enum.HumanoidStateType.Freefall then
+			self._fallStart = self.Physics.HRP.Position.y
 		end
 	end))
 
@@ -222,7 +260,7 @@ end
 function WallstickClass:Destroy()
 	setCollisionGroupId(self.Character:GetChildren(), 0)
 	RunService:UnbindFromRenderStep("WallstickStep")
-	self._maid:Sweep()
+	self.Maid:Sweep()
 end
 
 --

@@ -11,7 +11,7 @@ Players.LocalPlayer.CharacterAdded:Connect(function(character)
 	params.FilterDescendantsInstances = {character, wallstick.Physics.World}
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 
-	wallstick._maid:Mark(RunService.RenderStepped:Connect(function(dt)
+	wallstick.Maid:Mark(RunService.RenderStepped:Connect(function(dt)
 		local prevPart = wallstick.Part
 		local prevNormal = wallstick.Normal
 
@@ -25,6 +25,13 @@ Players.LocalPlayer.CharacterAdded:Connect(function(character)
 			if part ~= prevPart or normal:Dot(prevNormal) < 0.9 then
 				wallstick:Set(part, normal)
 			end
+		end
+	end))
+
+	wallstick.Maid:Mark(wallstick.Falling:Connect(function(height, fallDistance)
+		print(height, fallDistance)
+		if fallDistance > 100 then
+			wallstick:Set(workspace.Terrain, Vector3.new(0, 1, 0))
 		end
 	end))
 end)

@@ -11,6 +11,7 @@ local Maid = require(script:WaitForChild("Maid"))
 local Camera = require(script:WaitForChild("Camera"))
 local Control = require(script:WaitForChild("Control"))
 local Physics = require(script:WaitForChild("Physics"))
+local Animation = require(script:WaitForChild("Animation"))
 
 -- Class
 
@@ -31,6 +32,7 @@ function WallstickClass.new(player)
 
 	self._camera = Camera.new(self)
 	self._control = Control.new(self)
+	self._animation = Animation.new(self)
 	self._collisionParts = {}
 	self._maid = Maid.new()
 
@@ -160,6 +162,7 @@ function init(self)
 
 	self._maid:Mark(self._camera)
 	self._maid:Mark(self._control)
+	self._maid:Mark(self._animation)
 	self._maid:Mark(self.Physics)
 
 	self._maid:Mark(self.Humanoid.Died:Connect(function()

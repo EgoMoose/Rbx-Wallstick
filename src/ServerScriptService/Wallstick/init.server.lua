@@ -1,6 +1,7 @@
 local PhysicsService = game:GetService("PhysicsService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterPlayerScripts = game:GetService("StarterPlayer"):WaitForChild("StarterPlayerScripts")
+local StarterCharacterScripts = game:GetService("StarterPlayer"):WaitForChild("StarterCharacterScripts")
 
 local PlayerScriptsLoader = script:WaitForChild("PlayerScriptsLoader")
 local foundPlayerScriptsLoader = StarterPlayerScripts:FindFirstChild("PlayerScriptsLoader")
@@ -11,6 +12,15 @@ if foundPlayerScriptsLoader then
 end
 
 PlayerScriptsLoader.Parent = StarterPlayerScripts
+
+local Animate = script:WaitForChild("Animate")
+local foundAnimate = StarterCharacterScripts:FindFirstChild("Animate")
+
+if foundAnimate then
+	foundAnimate:Destroy()
+end
+
+Animate.Parent = StarterCharacterScripts
 
 local defaultGroup = PhysicsService:GetCollisionGroupName(0)
 local characterGroup = "WallstickCharacters"

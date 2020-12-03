@@ -7,12 +7,15 @@ local CONSTANTS = require(script:WaitForChild("Constants"))
 local ZERO3 = Vector3.new(0, 0, 0)
 local UNIT_Y = Vector3.new(0, 1, 0)
 
-local Maid = require(script:WaitForChild("Maid"))
-local Signal = require(script:WaitForChild("Signal"))
-local Camera = require(script:WaitForChild("Camera"))
-local Control = require(script:WaitForChild("Control"))
+local Utility = script:WaitForChild("Utility")
+local CharacterModules = script:WaitForChild("CharacterModules")
+
+local Maid = require(Utility:WaitForChild("Maid"))
+local Signal = require(Utility:WaitForChild("Signal"))
+local Camera = require(CharacterModules:WaitForChild("Camera"))
+local Control = require(CharacterModules:WaitForChild("Control"))
+local Animation = require(CharacterModules:WaitForChild("Animation"))
 local Physics = require(script:WaitForChild("Physics"))
-local Animation = require(script:WaitForChild("Animation"))
 
 -- Class
 

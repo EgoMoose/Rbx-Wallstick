@@ -1,6 +1,6 @@
 -- CONSTANTS
 
-local CONSTANTS = require(script.Parent:WaitForChild("Constants"))
+local CONSTANTS = require(script.Parent.Parent:WaitForChild("Constants"))
 
 local UNIT_Y = Vector3.new(0, 1, 0)
 

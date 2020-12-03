@@ -1,4 +1,4 @@
-local Wallstick = script.Parent:WaitForChild("Wallstick")
+local Wallstick = script.Parent.Parent:WaitForChild("Wallstick")
 local RemotesFolder = Wallstick:WaitForChild("Remotes")
 
 local replicatePhysics = Instance.new("RemoteEvent")

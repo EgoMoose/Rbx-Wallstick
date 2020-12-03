@@ -263,8 +263,11 @@ function WallstickClass:Set(part, normal, teleportCF)
 	local focusOffset = self.Physics.HRP.CFrame:ToObjectSpace(camera.Focus)
 
 	physicsHRP.CFrame = self.Physics.Floor.CFrame * part.CFrame:ToObjectSpace(teleportCF or self.HRP.CFrame)
-	physicsHRP.Velocity = physicsHRP.CFrame:VectorToWorldSpace(vel)
-	physicsHRP.RotVelocity = physicsHRP.CFrame:VectorToWorldSpace(rotVel)
+	
+	if CONSTANTS.MAINTAIN_WORLD_VELOCITY then
+		physicsHRP.Velocity = physicsHRP.CFrame:VectorToWorldSpace(vel)
+		physicsHRP.RotVelocity = physicsHRP.CFrame:VectorToWorldSpace(rotVel)
+	end
 
 	self._camera:SetSpinPart(part)
 

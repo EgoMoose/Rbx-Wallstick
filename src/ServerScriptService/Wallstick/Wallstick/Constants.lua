@@ -11,6 +11,7 @@ DEBUG_TRANSPARENCY = DEBUG and 0 or 1
 
 DEFAULT_CAMERA_MODE = DEBUG and "Debug" or "Custom"
 CUSTOM_CAMERA_SPIN = true -- if in custom camera match the part spin
+MAINTAIN_WORLD_VELOCITY = true -- maintains world space velocity when using the :Set() method 
 
 IGNORE_CLASS_PART = {
 	["Terrain"] = true,

@@ -38,7 +38,7 @@ local function onHeartbeat(dt)
 	local worldNormal = prevPart.CFrame:VectorToWorldSpace(prevNormal)
 	local result = workspace:Raycast(wallstick.HRP.Position, -getCastHeight() * worldNormal, params)
 
-	if result then
+	if result and result.Instance.CanCollide and not Players:GetPlayerFromCharacter(result.Instance.Parent) then
 		part = result.Instance
 		normal = part.CFrame:VectorToObjectSpace(result.Normal)
 	end

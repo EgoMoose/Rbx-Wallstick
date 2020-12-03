@@ -205,12 +205,8 @@ function init(self)
 	self.Maid:Mark(self._animation)
 	self.Maid:Mark(self.Physics)
 
-	self.Maid:Mark(self.Physics.Humanoid.Died:Connect(function()
-		self:Destroy()
-	end))
-
-	self.Maid:Mark(self.Physics.Character.AncestryChanged:Connect(function(_, parent)
-		if not parent then
+	self.Maid:Mark(self.Falling:Connect(function(height, distance)
+		if height <= workspace.FallenPartsDestroyHeight then
 			self:Destroy()
 		end
 	end))

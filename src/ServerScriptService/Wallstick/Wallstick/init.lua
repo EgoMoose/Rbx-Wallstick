@@ -246,6 +246,14 @@ function WallstickClass:SetMode(mode)
 	self._camera:SetMode(mode)
 end
 
+function WallstickClass:GetTransitionRate()
+	return self._camera.CameraModule:GetTransitionRate()
+end
+
+function WallstickClass:SetTransitionRate(rate)
+	self._camera.CameraModule:SetTransitionRate(rate)
+end
+
 function WallstickClass:Set(part, normal, teleportCF)
 	local physicsHRP = self.Physics.HRP
 	local vel = physicsHRP.CFrame:VectorToObjectSpace(physicsHRP.Velocity)
@@ -265,6 +273,7 @@ function WallstickClass:Set(part, normal, teleportCF)
 	local focusOffset = self.Physics.HRP.CFrame:ToObjectSpace(camera.Focus)
 
 	physicsHRP.CFrame = self.Physics.Floor.CFrame * part.CFrame:ToObjectSpace(teleportCF or self.HRP.CFrame)
+	self._fallStart = self.Physics.HRP.Position.y
 	
 	if CONSTANTS.MAINTAIN_WORLD_VELOCITY then
 		physicsHRP.Velocity = physicsHRP.CFrame:VectorToWorldSpace(vel)

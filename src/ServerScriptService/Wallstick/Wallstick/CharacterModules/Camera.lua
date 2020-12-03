@@ -31,7 +31,7 @@ end
 -- Private methods
 
 function init(self)
-	self:SetTransitionRate(0.15)
+	self.CameraModule.TransitionRate = 0.15
 	self:SetSpinPart(workspace.Terrain)
 	function self.CameraModule.GetUpVector(this, upVector)
 		return self.UpVector
@@ -54,10 +54,6 @@ function CameraClass:SetMode(mode)
 	end
 end
 
-function CameraClass:SetTransitionRate(rate)
-	self.CameraModule.TransitionRate = rate
-end
-
 function CameraClass:SetSpinPart(part)
 	if self.Wallstick.Mode == "Custom" and CONSTANTS.CUSTOM_CAMERA_SPIN then
 		self.CameraModule:SetSpinPart(part)
@@ -71,7 +67,7 @@ function CameraClass:SetUpVector(normal)
 end
 
 function CameraClass:Destroy()
-	self:SetTransitionRate(1)
+	self.CameraModule.TransitionRate = 1
 	self:SetSpinPart(workspace.Terrain)
 	function self.CameraModule.GetUpVector(this, upVector)
 		return Vector3.new(0, 1, 0)

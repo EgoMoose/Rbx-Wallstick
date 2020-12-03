@@ -159,6 +159,10 @@ function Camera:SetTransitionRate(rate)
 	transitionRate = rate
 end
 
+function Camera:GetTransitionRate()
+	return transitionRate
+end
+
 function Camera:Update(dt)
 	if self.activeCameraController then
 		if FFlagUserCameraToggle then

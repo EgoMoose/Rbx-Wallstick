@@ -168,7 +168,7 @@ local function characterStep(self, dt)
 	self.HRP.RotVelocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
 
 	for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
-		if enum ~= Enum.HumanoidStateType.None then
+		if not CONSTANTS.IGNORE_STATES[enum] then
 			self.Humanoid:SetStateEnabled(enum, false)
 		end
 	end

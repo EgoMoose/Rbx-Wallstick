@@ -19,6 +19,11 @@ IGNORE_CLASS_PART = {
 	["VehicleSeat"] = true
 }
 
+IGNORE_STATES = {
+	[Enum.HumanoidStateType.None] = true,
+	[Enum.HumanoidStateType.Dead] = true,
+}
+
 local env = getfenv()
 env.script = nil
 return env

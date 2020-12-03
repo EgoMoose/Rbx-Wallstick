@@ -66,6 +66,16 @@ local function setCollisionGroupId(array, id)
 	end
 end
 
+local function getRotationBetween(u, v, axis)
+	local dot, uxv = u:Dot(v), u:Cross(v)
+	if dot < -0.99999 then return CFrame.fromAxisAngle(axis, math.pi) end
+	return CFrame.new(0, 0, 0, uxv.x, uxv.y, uxv.z, 1 + dot)
+end
+
+local function getFloorHeight(self)
+	return self.Humanoid.HipHeight + self.HRP.Size.y/2
+end
+
 local function generalStep(self, dt)
 	self.HRP.Velocity = ZERO3
 	self.HRP.RotVelocity = ZERO3
@@ -114,6 +124,7 @@ local function collisionStep(self, dt)
 
 			physicsPart.Transparency = CONSTANTS.DEBUG_TRANSPARENCY
 			physicsPart.Anchored = true
+			physicsPart.CastShadow = false
 			physicsPart.Velocity = ZERO3
 			physicsPart.RotVelocity = ZERO3
 			physicsPart.Parent = self.Physics.Collision
@@ -215,6 +226,14 @@ function init(self)
 		end
 	end))
 
+	self.Maid:Mark(function()
+		for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
+			if enum ~= Enum.HumanoidStateType.None then
+				self.Humanoid:SetStateEnabled(enum, true)
+			end
+		end
+	end)
+
 	RunService:BindToRenderStep("WallstickStep", Enum.RenderPriority.Camera.Value - 1, function(dt)
 		generalStep(self, dt)
 		collisionStep(self, dt)
@@ -266,7 +285,11 @@ function WallstickClass:Set(part, normal, teleportCF)
 	local cameraOffset = self.Physics.HRP.CFrame:ToObjectSpace(camera.CFrame)
 	local focusOffset = self.Physics.HRP.CFrame:ToObjectSpace(camera.Focus)
 
-	physicsHRP.CFrame = self.Physics.Floor.CFrame * part.CFrame:ToObjectSpace(teleportCF or self.HRP.CFrame)
+	local floorHeight = getFloorHeight(self)
+	local targetCF = self.Physics.Floor.CFrame * part.CFrame:ToObjectSpace(teleportCF or self.HRP.CFrame) * CFrame.new(0, -floorHeight, 0)
+	local sphericalArc = getRotationBetween(targetCF.YVector, UNIT_Y, targetCF.XVector)
+
+	physicsHRP.CFrame = (sphericalArc * (targetCF - targetCF.p)) * CFrame.new(0, floorHeight, 0) + targetCF.p
 	self._fallStart = self.Physics.HRP.Position.y
 	
 	if CONSTANTS.MAINTAIN_WORLD_VELOCITY then

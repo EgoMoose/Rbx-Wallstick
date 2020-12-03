@@ -132,6 +132,7 @@ function PhysicsClass:UpdateFloor(prevPart, newPart, prevNormal, newNormal)
 	floor.Name = "PhysicsFloor"
 	floor.Transparency = CONSTANTS.DEBUG_TRANSPARENCY
 	floor.Anchored = true
+	floor.CastShadow = false
 	floor.Velocity = ZERO3
 	floor.RotVelocity = ZERO3
 	floor.CFrame = CONSTANTS.WORLD_CENTER * getRotationBetween(newNormal, UNIT_Y, UNIT_X)

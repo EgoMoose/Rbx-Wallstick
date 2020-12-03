@@ -8,12 +8,17 @@ local wallstick = nil
 
 local prevTick = -1
 local isFalling = false
+local renderParams = nil
 local params = RaycastParams.new()
 params.FilterDescendantsInstances = {}
 params.FilterType = Enum.RaycastFilterType.Blacklist
 
 local function lerp(a, b, t)
 	return (1 - t)*a + t*b
+end
+
+local function getCastHeight()
+	return wallstick.Humanoid.HipHeight + wallstick.Humanoid.RootPart.Size.y/2 + 1
 end
 
 local function updateTransition(part, dt)
@@ -24,11 +29,7 @@ local function updateTransition(part, dt)
 	end
 end
 
-local function getCastHeight()
-	return wallstick.Humanoid.HipHeight + wallstick.Humanoid.RootPart.Size.y/2 + 1
-end
-
-local function onStep(dt)
+local function onHeartbeat(dt)
 	local prevPart = wallstick.Part
 	local prevNormal = wallstick.Normal
 	local part = isFalling and workspace.Terrain or prevPart
@@ -43,26 +44,35 @@ local function onStep(dt)
 	end
 
 	local t = os.clock()
+	renderParams = nil
 
-	local wPrevNormal = prevPart.CFrame:VectorToWorldSpace(prevNormal)
-	local wNormal = part.CFrame:VectorToWorldSpace(normal)
-
-	if t - prevTick > 0.2 and part ~= prevPart then
+	if t - prevTick > 0.3 and part ~= prevPart then
 		updateTransition(part, dt)
 		wallstick:Set(part, normal)
 		prevTick = t
-	elseif part == prevPart and wPrevNormal:Dot(wNormal) < 1 then
-		updateTransition(part, dt)
-		wallstick:Set(part, normal)
+	elseif part == prevPart then
+		local wNormal = part.CFrame:VectorToObjectSpace(normal)
+		local wPrevNormal = prevPart.CFrame:VectorToObjectSpace(prevNormal)
+		if wNormal ~= wPrevNormal then
+			updateTransition(part, dt)
+			renderParams = {part, normal}
+		end
 	else
 		updateTransition(prevPart, dt)
 	end
 end
 
+local function onRenderStep(dt)
+	if renderParams then
+		wallstick:Set(unpack(renderParams))
+	end
+end
+
 Tool.Equipped:Connect(function()
 	wallstick = WallstickClass.new(Players.LocalPlayer)
-	wallstick.Maid:Mark(RunService.RenderStepped:Connect(onStep))
-	wallstick.Maid:Mark(RunService.RenderStepped:Connect(function()
+	wallstick.Maid:Mark(RunService.Heartbeat:Connect(onHeartbeat))
+	wallstick.Maid:Mark(RunService.RenderStepped:Connect(onRenderStep))
+	wallstick.Maid:Mark(RunService.Heartbeat:Connect(function()
 		local height, distance = wallstick:GetFallHeight()
 		isFalling = (distance < -50)
 	end))
@@ -72,4 +82,5 @@ end)
 Tool.Unequipped:Connect(function()
 	wallstick:Destroy()
 	wallstick = nil
+	renderParams = nil
 end)

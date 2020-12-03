@@ -11,6 +11,8 @@ Players.LocalPlayer.CharacterAdded:Connect(function(character)
 	params.FilterDescendantsInstances = {character, wallstick.Physics.World}
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 
+	local prevTick = -1
+
 	wallstick.Maid:Mark(RunService.RenderStepped:Connect(function(dt)
 		local prevPart = wallstick.Part
 		local prevNormal = wallstick.Normal
@@ -22,8 +24,10 @@ Players.LocalPlayer.CharacterAdded:Connect(function(character)
 			local part = result.Instance
 			local normal = part.CFrame:VectorToObjectSpace(result.Normal)
 
-			if part ~= prevPart or normal:Dot(prevNormal) < 0.9 then
+			local t = os.clock()
+			if t - prevTick > 0.2 and part ~= prevPart then
 				wallstick:Set(part, normal)
+				prevTick = t
 			end
 		end
 	end))

@@ -68,6 +68,8 @@ local function setCollisionGroupId(array, id)
 end
 
 local function generalStep(self, dt)
+	self.HRP.Velocity = ZERO3
+	self.HRP.RotVelocity = ZERO3
 	self.HRP.CFrame = self.Part.CFrame * self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
 
 	if not self.Part.Parent then

@@ -7,6 +7,7 @@ local CONSTANTS = require(script:WaitForChild("Constants"))
 local ZERO3 = Vector3.new(0, 0, 0)
 local UNIT_Y = Vector3.new(0, 1, 0)
 
+local Remotes = script:WaitForChild("Remotes")
 local Utility = script:WaitForChild("Utility")
 local CharacterModules = script:WaitForChild("CharacterModules")
 
@@ -16,6 +17,8 @@ local Camera = require(CharacterModules:WaitForChild("Camera"))
 local Control = require(CharacterModules:WaitForChild("Control"))
 local Animation = require(CharacterModules:WaitForChild("Animation"))
 local Physics = require(script:WaitForChild("Physics"))
+
+local ReplicatePhysics = Remotes:WaitForChild("ReplicatePhysics")
 
 -- Class
 
@@ -38,6 +41,7 @@ function WallstickClass.new(player)
 	self._control = Control.new(self)
 	self._animation = Animation.new(self)
 
+	self._replicateTick = -1
 	self._collisionParts = {}
 	self._fallStart = 0
 
@@ -179,6 +183,15 @@ local function characterStep(self, dt)
 	end
 end
 
+local function replicateStep(self, dt)
+	local t = os.clock()
+	if t - self._replicateTick >= CONSTANTS.REPLICATE_RATE then
+		local offset = self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
+		ReplicatePhysics:FireServer(self.Part, offset, false)
+		self._replicateTick = t
+	end
+end
+
 function init(self)
 	setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
 
@@ -220,6 +233,7 @@ function init(self)
 		generalStep(self, dt)
 		collisionStep(self, dt)
 		characterStep(self, dt)
+		replicateStep(self, dt)
 	end)
 end
 
@@ -263,6 +277,7 @@ end
 function WallstickClass:Destroy()
 	setCollisionGroupId(self.Character:GetChildren(), 0)
 	RunService:UnbindFromRenderStep("WallstickStep")
+	ReplicatePhysics:FireServer(nil, nil, true)
 	self.Maid:Sweep()
 end
 

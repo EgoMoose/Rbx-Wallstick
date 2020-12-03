@@ -4,6 +4,8 @@ WORLD_CENTER = CFrame.new(10000, 0, 0)
 COLLIDER_SIZE2 = Vector3.new(32, 32, 32)
 PHYSICS_ID = PhysicsService:GetCollisionGroupId("WallstickCharacters")
 
+REPLICATE_RATE = 0.1 -- send an update every x seconds
+
 DEBUG = false
 DEBUG_TRANSPARENCY = DEBUG and 0 or 1
 

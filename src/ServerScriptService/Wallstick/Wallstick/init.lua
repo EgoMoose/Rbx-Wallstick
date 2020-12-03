@@ -46,7 +46,6 @@ function WallstickClass.new(player)
 	self._fallStart = 0
 
 	self.Maid = Maid.new()
-	self.Falling = Signal.new()
 
 	self.Part = nil
 	self.Normal = UNIT_Y
@@ -178,11 +177,6 @@ local function characterStep(self, dt)
 	local targetState = self.Physics.Humanoid:GetState()
 	self.Humanoid:SetStateEnabled(targetState, true)
 	self.Humanoid:ChangeState(targetState)
-
-	if targetState == Enum.HumanoidStateType.Freefall then
-		local height = self.Physics.HRP.Position.y
-		self.Falling:Fire(height, self._fallStart - height)
-	end
 end
 
 local function replicateStep(self, dt)
@@ -205,12 +199,6 @@ function init(self)
 	self.Maid:Mark(self._animation)
 	self.Maid:Mark(self.Physics)
 
-	self.Maid:Mark(self.Falling:Connect(function(height, distance)
-		if height <= workspace.FallenPartsDestroyHeight then
-			self:Destroy()
-		end
-	end))
-
 	self.Maid:Mark(self.Humanoid.Died:Connect(function()
 		self:Destroy()
 	end))
@@ -232,6 +220,11 @@ function init(self)
 		collisionStep(self, dt)
 		characterStep(self, dt)
 		replicateStep(self, dt)
+
+		local height, distance = self:GetFallHeight()
+		if height <= workspace.FallenPartsDestroyHeight then
+			self:Destroy()
+		end
 	end)
 end
 
@@ -248,6 +241,11 @@ end
 
 function WallstickClass:SetTransitionRate(rate)
 	self._camera.CameraModule:SetTransitionRate(rate)
+end
+
+function WallstickClass:GetFallHeight()
+	local height = self.Physics.HRP.Position.y
+	return height, height - self._fallStart
 end
 
 function WallstickClass:Set(part, normal, teleportCF)

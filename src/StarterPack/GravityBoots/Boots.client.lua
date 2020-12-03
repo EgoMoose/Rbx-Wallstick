@@ -43,10 +43,17 @@ local function onStep(dt)
 	end
 
 	local t = os.clock()
+
+	local wPrevNormal = prevPart.CFrame:VectorToWorldSpace(prevNormal)
+	local wNormal = part.CFrame:VectorToWorldSpace(normal)
+
 	if t - prevTick > 0.2 and part ~= prevPart then
 		updateTransition(part, dt)
 		wallstick:Set(part, normal)
 		prevTick = t
+	elseif part == prevPart and wPrevNormal:Dot(wNormal) < 1 then
+		updateTransition(part, dt)
+		wallstick:Set(part, normal)
 	else
 		updateTransition(prevPart, dt)
 	end
@@ -55,8 +62,9 @@ end
 Tool.Equipped:Connect(function()
 	wallstick = WallstickClass.new(Players.LocalPlayer)
 	wallstick.Maid:Mark(RunService.RenderStepped:Connect(onStep))
-	wallstick.Maid:Mark(wallstick.Falling:Connect(function(height, distance)
-		isFalling = (distance > 5)
+	wallstick.Maid:Mark(RunService.RenderStepped:Connect(function()
+		local height, distance = wallstick:GetFallHeight()
+		isFalling = (distance < -50)
 	end))
 	params.FilterDescendantsInstances = {wallstick.Character, wallstick.Physics.World}
 end)

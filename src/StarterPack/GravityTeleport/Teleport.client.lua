@@ -22,6 +22,10 @@ local function getRotationBetween(u, v, axis)
 	return CFrame.new(0, 0, 0, uxv.x, uxv.y, uxv.z, 1 + dot)
 end
 
+local function getCharHeight()
+	return wallstick.Humanoid.HipHeight + wallstick.Humanoid.RootPart.Size.y/2
+end
+
 local function updateTransition(part, dt)
 	if part.Anchored then
 		wallstick:SetTransitionRate(0.15)
@@ -40,7 +44,7 @@ local function onMouseDown()
 
 		local hrpCF = wallstick.HRP.CFrame
 		local sphericalArc = getRotationBetween(hrpCF.YVector, result.Normal, hrpCF.XVector)
-		local teleportCF  = sphericalArc * (hrpCF - hrpCF.p) + result.Position
+		local teleportCF  = sphericalArc * (hrpCF - hrpCF.p) * CFrame.new(0, getCharHeight(), 0) + result.Position
 
 		updateTransition(part, 0)
 		wallstick:Set(part, normal, teleportCF)

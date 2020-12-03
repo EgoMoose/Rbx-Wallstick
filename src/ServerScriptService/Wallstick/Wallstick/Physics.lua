@@ -33,7 +33,7 @@ function PhysicsClass.new(wallstick)
 
 	self.World = Instance.new("Model")
 	self.World.Name = "PhysicsWorld"
-	self.World.Parent = workspace
+	self.World.Parent = workspace.CurrentCamera
 
 	self.Collision = Instance.new("Model")
 	self.Collision.Name = "PhysicsCollision"

@@ -156,9 +156,9 @@ local function characterStep(self, dt)
 		self.Physics.Humanoid:Move(move, true)
 	end
 
-	local floorCF = self.Physics.Floor.CFrame
-	self.HRP.Velocity = self.Part.CFrame:VectorToWorldSpace(floorCF:VectorToObjectSpace(self.Physics.HRP.Velocity))
-	self.HRP.RotVelocity = self.Part.CFrame:VectorToWorldSpace(floorCF:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
+	local physicsHRPCF = self.Physics.HRP.CFrame
+	self.HRP.Velocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.Velocity))
+	self.HRP.RotVelocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
 
 	for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
 		if enum ~= Enum.HumanoidStateType.None then

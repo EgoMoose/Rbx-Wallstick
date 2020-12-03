@@ -29,7 +29,6 @@ Players.LocalPlayer.CharacterAdded:Connect(function(character)
 	end))
 
 	wallstick.Maid:Mark(wallstick.Falling:Connect(function(height, fallDistance)
-		print(height, fallDistance)
 		if fallDistance > 100 then
 			wallstick:Set(workspace.Terrain, Vector3.new(0, 1, 0))
 		end

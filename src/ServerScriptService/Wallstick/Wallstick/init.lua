@@ -72,10 +72,6 @@ local function getRotationBetween(u, v, axis)
 	return CFrame.new(0, 0, 0, uxv.x, uxv.y, uxv.z, 1 + dot)
 end
 
-local function getFloorHeight(self)
-	return self.Humanoid.HipHeight + self.HRP.Size.y/2
-end
-
 local function generalStep(self, dt)
 	self.HRP.Velocity = ZERO3
 	self.HRP.RotVelocity = ZERO3
@@ -285,11 +281,10 @@ function WallstickClass:Set(part, normal, teleportCF)
 	local cameraOffset = self.Physics.HRP.CFrame:ToObjectSpace(camera.CFrame)
 	local focusOffset = self.Physics.HRP.CFrame:ToObjectSpace(camera.Focus)
 
-	local floorHeight = getFloorHeight(self)
-	local targetCF = self.Physics.Floor.CFrame * part.CFrame:ToObjectSpace(teleportCF or self.HRP.CFrame) * CFrame.new(0, -floorHeight, 0)
+	local targetCF = self.Physics.Floor.CFrame * part.CFrame:ToObjectSpace(teleportCF or self.HRP.CFrame)
 	local sphericalArc = getRotationBetween(targetCF.YVector, UNIT_Y, targetCF.XVector)
 
-	physicsHRP.CFrame = (sphericalArc * (targetCF - targetCF.p)) * CFrame.new(0, floorHeight, 0) + targetCF.p
+	physicsHRP.CFrame = (sphericalArc * (targetCF - targetCF.p)) + targetCF.p
 	self._fallStart = self.Physics.HRP.Position.y
 	
 	if CONSTANTS.MAINTAIN_WORLD_VELOCITY then

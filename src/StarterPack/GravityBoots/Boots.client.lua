@@ -8,7 +8,8 @@ local wallstick = nil
 
 local prevTick = -1
 local isFalling = false
-local renderParams = nil
+local renderStep = false
+
 local params = RaycastParams.new()
 params.FilterDescendantsInstances = {}
 params.FilterType = Enum.RaycastFilterType.Blacklist
@@ -29,13 +30,11 @@ local function updateTransition(part, dt)
 	end
 end
 
-local function onHeartbeat(dt)
-	local prevPart = wallstick.Part
-	local prevNormal = wallstick.Normal
-	local part = isFalling and workspace.Terrain or prevPart
-	local normal = isFalling and Vector3.new(0, 1, 0) or prevNormal
-
-	local worldNormal = prevPart.CFrame:VectorToWorldSpace(prevNormal)
+local function raycast()
+	local part = isFalling and workspace.Terrain or wallstick.Part
+	local normal = isFalling and Vector3.new(0, 1, 0) or wallstick.Normal
+	
+	local worldNormal = wallstick.Part.CFrame:VectorToWorldSpace(wallstick.Normal)
 	local result = workspace:Raycast(wallstick.HRP.Position, -getCastHeight() * worldNormal, params)
 
 	if result and result.Instance.CanCollide and not Players:GetPlayerFromCharacter(result.Instance.Parent) then
@@ -43,28 +42,32 @@ local function onHeartbeat(dt)
 		normal = part.CFrame:VectorToObjectSpace(result.Normal)
 	end
 
-	local t = os.clock()
-	renderParams = nil
+	return part, normal
+end
 
-	if t - prevTick > 0.3 and part ~= prevPart then
+local function onHeartbeat(dt)
+	local part, normal = raycast()
+
+	local t = os.clock()
+	renderStep = false
+
+	if t - prevTick > 0.3 and part ~= wallstick.Part then
 		updateTransition(part, dt)
 		wallstick:Set(part, normal)
 		prevTick = t
-	elseif part == prevPart then
-		local wNormal = part.CFrame:VectorToObjectSpace(normal)
-		local wPrevNormal = prevPart.CFrame:VectorToObjectSpace(prevNormal)
-		if wNormal ~= wPrevNormal then
-			updateTransition(part, dt)
-			renderParams = {part, normal}
+	elseif part == wallstick.Part then
+		if normal ~= wallstick.Normal then
+			updateTransition(wallstick.Part, dt)
+			renderStep = true
 		end
 	else
-		updateTransition(prevPart, dt)
+		updateTransition(wallstick.Part, dt)
 	end
 end
 
 local function onRenderStep(dt)
-	if renderParams then
-		wallstick:Set(unpack(renderParams))
+	if renderStep then
+		wallstick:Set(raycast())
 	end
 end
 
@@ -82,5 +85,5 @@ end)
 Tool.Unequipped:Connect(function()
 	wallstick:Destroy()
 	wallstick = nil
-	renderParams = nil
+	renderStep = false
 end)

@@ -41,6 +41,7 @@ function WallstickClass.new(player)
 	self._control = Control.new(self)
 	self._animation = Animation.new(self)
 
+	self._enabled = true
 	self._replicateTick = -1
 	self._collisionParts = {}
 	self._fallStart = 0
@@ -70,6 +71,14 @@ local function getRotationBetween(u, v, axis)
 	local dot, uxv = u:Dot(v), u:Cross(v)
 	if dot < -0.99999 then return CFrame.fromAxisAngle(axis, math.pi) end
 	return CFrame.new(0, 0, 0, uxv.x, uxv.y, uxv.z, 1 + dot)
+end
+
+local function resetHumanoidStates(humanoid)
+	for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
+		if enum ~= Enum.HumanoidStateType.None then
+			humanoid:SetStateEnabled(enum, true)
+		end
+	end
 end
 
 local function generalStep(self, dt)
@@ -195,6 +204,32 @@ local function replicateStep(self, dt)
 	end
 end
 
+local function setEnabled(self, bool)
+	if self._enabled == bool then
+		return
+	end
+
+	self._enabled = bool
+	if bool then
+		self.Physics.HRP.Anchored = false
+		self._animation.ReplicatedHumanoid.Value = self.Physics.Humanoid
+		setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
+		self:Set(self.Part, self.Normal)
+	else
+		self.Physics.HRP.Anchored = true
+		self._animation.ReplicatedHumanoid.Value = self.Humanoid
+		resetHumanoidStates(self.Humanoid)
+		setCollisionGroupId(self.Character:GetChildren(), 0)
+		ReplicatePhysics:FireServer(nil, nil, true)
+	end
+end
+
+local function onSeatPart(self)
+	local seated = self.Humanoid.SeatPart
+	setEnabled(self, not seated)
+	if seated then self.Humanoid:ChangeState(Enum.HumanoidStateType.Seated) end
+end
+
 function init(self)
 	setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
 
@@ -205,6 +240,11 @@ function init(self)
 	self.Maid:Mark(self._control)
 	self.Maid:Mark(self._animation)
 	self.Maid:Mark(self.Physics)
+
+	onSeatPart(self)
+	self.Maid:Mark(self.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
+		onSeatPart(self)
+	end))
 
 	self.Maid:Mark(self.Humanoid.Died:Connect(function()
 		self:Destroy()
@@ -223,14 +263,14 @@ function init(self)
 	end))
 
 	self.Maid:Mark(function()
-		for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
-			if enum ~= Enum.HumanoidStateType.None then
-				self.Humanoid:SetStateEnabled(enum, true)
-			end
-		end
+		resetHumanoidStates(self.Humanoid)
 	end)
 
 	RunService:BindToRenderStep("WallstickStep", Enum.RenderPriority.Camera.Value - 1, function(dt)
+		if not self._enabled then
+			return
+		end
+
 		generalStep(self, dt)
 		collisionStep(self, dt)
 		characterStep(self, dt)
@@ -264,6 +304,10 @@ function WallstickClass:GetFallHeight()
 end
 
 function WallstickClass:Set(part, normal, teleportCF)
+	if not self._enabled then
+		return
+	end
+
 	local physicsHRP = self.Physics.HRP
 	local vel = physicsHRP.CFrame:VectorToObjectSpace(physicsHRP.Velocity)
 	local rotVel = physicsHRP.CFrame:VectorToObjectSpace(physicsHRP.RotVelocity)

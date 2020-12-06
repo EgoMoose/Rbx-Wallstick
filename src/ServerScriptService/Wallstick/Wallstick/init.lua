@@ -41,7 +41,7 @@ function WallstickClass.new(player)
 	self._control = Control.new(self)
 	self._animation = Animation.new(self)
 
-	self._enabled = true
+	self._seated = false
 	self._replicateTick = -1
 	self._collisionParts = {}
 	self._fallStart = 0
@@ -86,7 +86,7 @@ local function generalStep(self, dt)
 	self.HRP.RotVelocity = ZERO3
 	self.HRP.CFrame = self.Part.CFrame * self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
 
-	if not self.Part.Parent then
+	if not self.Part:IsDescendantOf(workspace) then
 		self:Set(workspace.Terrain, UNIT_Y)
 	end
 
@@ -204,30 +204,27 @@ local function replicateStep(self, dt)
 	end
 end
 
-local function setEnabled(self, bool)
-	if self._enabled == bool then
+local function setSeated(self, bool)
+	if self._seated == bool then
 		return
 	end
 
-	self._enabled = bool
-	if bool then
+	if not bool then
 		self.Physics.HRP.Anchored = false
 		self._animation.ReplicatedHumanoid.Value = self.Physics.Humanoid
 		setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
 		self:Set(self.Part, self.Normal)
 	else
+		self:Set(self.Humanoid.SeatPart, UNIT_Y)
 		self.Physics.HRP.Anchored = true
 		self._animation.ReplicatedHumanoid.Value = self.Humanoid
 		resetHumanoidStates(self.Humanoid)
 		setCollisionGroupId(self.Character:GetChildren(), 0)
 		ReplicatePhysics:FireServer(nil, nil, true)
+		self.Humanoid:ChangeState(Enum.HumanoidStateType.Seated)
 	end
-end
 
-local function onSeatPart(self)
-	local seated = self.Humanoid.SeatPart
-	setEnabled(self, not seated)
-	if seated then self.Humanoid:ChangeState(Enum.HumanoidStateType.Seated) end
+	self._seated = bool
 end
 
 function init(self)
@@ -241,9 +238,9 @@ function init(self)
 	self.Maid:Mark(self._animation)
 	self.Maid:Mark(self.Physics)
 
-	onSeatPart(self)
+	setSeated(self, not not self.Humanoid.SeatPart)
 	self.Maid:Mark(self.Humanoid:GetPropertyChangedSignal("SeatPart"):Connect(function()
-		onSeatPart(self)
+		setSeated(self, not not self.Humanoid.SeatPart)
 	end))
 
 	self.Maid:Mark(self.Humanoid.Died:Connect(function()
@@ -267,7 +264,8 @@ function init(self)
 	end)
 
 	RunService:BindToRenderStep("WallstickStep", Enum.RenderPriority.Camera.Value - 1, function(dt)
-		if not self._enabled then
+		if self._seated then
+			self._camera:SetUpVector(self.HRP.CFrame.YVector)
 			return
 		end
 
@@ -304,7 +302,7 @@ function WallstickClass:GetFallHeight()
 end
 
 function WallstickClass:Set(part, normal, teleportCF)
-	if not self._enabled then
+	if self._seated then
 		return
 	end
 

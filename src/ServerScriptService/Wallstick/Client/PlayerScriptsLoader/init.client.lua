@@ -99,6 +99,17 @@ function BaseCamera:UpdateMouseBehavior()
 	end
 end
 
+-- Vehicle Camera
+
+local VehicleCamera = require(CameraModule:WaitForChild("VehicleCamera"))
+local VehicleCameraCore = require(CameraModule.VehicleCamera:WaitForChild("VehicleCameraCore"))
+local setTransform = VehicleCameraCore.setTransform
+
+function VehicleCameraCore:setTransform(transform)
+	transform = upCFrame:ToObjectSpace(transform - transform.p) + transform.p
+	return setTransform(self, transform)
+end
+
 -- Camera Module
 
 local function getRotationBetween(u, v, axis)
@@ -170,6 +181,7 @@ function Camera:Update(dt)
 		end
 
 		local newCameraCFrame, newCameraFocus = self.activeCameraController:Update(dt)
+		newCameraFocus = CFrame.new(newCameraFocus.p) -- vehicle camera fix
 		self.activeCameraController:ApplyVRTransform()
 
 		calculateUpCFrame(self)

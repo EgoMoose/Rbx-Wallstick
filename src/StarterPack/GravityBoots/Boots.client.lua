@@ -23,7 +23,7 @@ local function getCastHeight()
 end
 
 local function updateTransition(part, dt)
-	if part.Anchored then
+	if part.Anchored and not part.ClassName:match("Seat") then
 		wallstick:SetTransitionRate(0.15)
 	else
 		wallstick:SetTransitionRate(lerp(wallstick:GetTransitionRate(), 1, 0.1*dt*60))

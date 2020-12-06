@@ -31,7 +31,7 @@ end
 -- Private methods
 
 function init(self)
-	self.CameraModule.TransitionRate = 0.15
+	self.CameraModule:SetTransitionRate(0.15)
 	self:SetSpinPart(workspace.Terrain)
 	function self.CameraModule.GetUpVector(this, upVector)
 		return self.UpVector
@@ -67,7 +67,7 @@ function CameraClass:SetUpVector(normal)
 end
 
 function CameraClass:Destroy()
-	self.CameraModule.TransitionRate = 1
+	self.CameraModule:SetTransitionRate(1)
 	self:SetSpinPart(workspace.Terrain)
 	function self.CameraModule.GetUpVector(this, upVector)
 		return Vector3.new(0, 1, 0)

@@ -330,8 +330,8 @@ function WallstickClass:Set(part, normal, teleportCF)
 	self._fallStart = self.Physics.HRP.Position.y
 	
 	if CONSTANTS.MAINTAIN_WORLD_VELOCITY then
-		physicsHRP.Velocity = physicsHRP.CFrame:VectorToWorldSpace(vel)
-		physicsHRP.RotVelocity = physicsHRP.CFrame:VectorToWorldSpace(rotVel)
+		physicsHRP.Velocity = targetCF:VectorToWorldSpace(vel)
+		physicsHRP.RotVelocity = targetCF:VectorToWorldSpace(rotVel)
 	end
 
 	self._camera:SetSpinPart(part)

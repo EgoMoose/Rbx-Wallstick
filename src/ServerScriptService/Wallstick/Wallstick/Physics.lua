@@ -1,15 +1,9 @@
 -- CONSTANTS
 
-local R15 = {
+local STRIP = {
 	["Part"] = true,
 	["MeshPart"] = true,
 	["Motor6D"] = true,
-	["Humanoid"] = true,
-}
-
-local R6 = {
-	["Head"] = true,
-	["HumanoidRootPart"] = true,
 	["Humanoid"] = true,
 }
 
@@ -70,12 +64,8 @@ function stripCopyCharacter(character)
 	clone = character:Clone()
 	character.Archivable = archivable
 
-	local realHumanoid = character:WaitForChild("Humanoid")
-	local isR15 = (realHumanoid.RigType == Enum.HumanoidRigType.R15)
-	local validClasses = isR15 and R15 or R6
-
 	for _, part in pairs(clone:GetDescendants()) do
-		if not validClasses[part.ClassName] then
+		if not STRIP[part.ClassName] then
 			part:Destroy()
 		elseif part:IsA("BasePart") then
 			part.Transparency = CONSTANTS.DEBUG_TRANSPARENCY
@@ -83,7 +73,7 @@ function stripCopyCharacter(character)
 	end
 
 	local humanoid = clone:WaitForChild("Humanoid")
-	
+
 	humanoid:ClearAllChildren()
 	humanoid.MaxHealth = math.huge
 	humanoid.Health = math.huge

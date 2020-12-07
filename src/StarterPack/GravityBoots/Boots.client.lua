@@ -19,7 +19,8 @@ local function lerp(a, b, t)
 end
 
 local function getCastHeight()
-	return wallstick.Humanoid.HipHeight + wallstick.Humanoid.RootPart.Size.y/2 + 1
+	local isR15 = wallstick.Humanoid.RigType == Enum.HumanoidRigType.R15
+	return isR15 and wallstick.Humanoid.HipHeight + wallstick.Humanoid.RootPart.Size.y/2 + 1 or 3.5
 end
 
 local function updateTransition(part, dt)

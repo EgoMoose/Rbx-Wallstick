@@ -17,6 +17,7 @@ require(CameraInjector)
 -- Control Modifications
 
 local Control = require(PlayerModule:WaitForChild("ControlModule"))
+local TouchJump = require(PlayerModule.ControlModule:WaitForChild("TouchJump"))
 
 function Control:IsJumping()
 	if self.activeController then
@@ -24,6 +25,13 @@ function Control:IsJumping()
 			or (self.touchJumpController and self.touchJumpController:GetIsJumping())
 	end
 	return false
+end
+
+local oldEnabled = TouchJump.UpdateEnabled
+
+function TouchJump:UpdateEnabled()
+	self.jumpStateEnabled = true
+	oldEnabled(self)
 end
 
 -- Camera Modifications

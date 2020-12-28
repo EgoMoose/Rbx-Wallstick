@@ -11,8 +11,8 @@ local function replace(child, parent)
 	child.Parent = parent
 end
 
-require(Server:WaitForChild("Remotes"))
 require(Server:WaitForChild("Collisions"))
+require(Server:WaitForChild("Remotes"))
 
 replace(Client:WaitForChild("PlayerScriptsLoader"), StarterPlayerScripts)
 replace(Client:WaitForChild("WallstickClient"), StarterPlayerScripts)

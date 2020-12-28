@@ -19,6 +19,7 @@ local Animation = require(CharacterModules:WaitForChild("Animation"))
 local Physics = require(script:WaitForChild("Physics"))
 
 local ReplicatePhysics = Remotes:WaitForChild("ReplicatePhysics")
+local SetCollidable = Remotes:WaitForChild("SetCollidable")
 
 -- Class
 
@@ -229,6 +230,7 @@ end
 
 function init(self)
 	setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
+	SetCollidable:FireServer(false)
 
 	self:SetMode(CONSTANTS.DEFAULT_CAMERA_MODE)
 	self:Set(workspace.Terrain, UNIT_Y)
@@ -346,6 +348,7 @@ function WallstickClass:Destroy()
 	setCollisionGroupId(self.Character:GetChildren(), 0)
 	RunService:UnbindFromRenderStep("WallstickStep")
 	ReplicatePhysics:FireServer(nil, nil, true)
+	SetCollidable:FireServer(true)
 	self.Maid:Sweep()
 end
 

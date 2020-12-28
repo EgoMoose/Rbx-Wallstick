@@ -229,7 +229,7 @@ end
 
 function Camera:IsFirstPerson()
 	if self.activeCameraController then
-		return self.activeCameraController:InFirstPerson()
+		return self.activeCameraController.inFirstPerson
 	end
 	return false
 end

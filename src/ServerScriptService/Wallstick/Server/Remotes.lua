@@ -27,7 +27,7 @@ local replicatePhysics = Instance.new("RemoteEvent")
 replicatePhysics.Name = "ReplicatePhysics"
 replicatePhysics.Parent = RemotesFolder
 
-replicatePhysics.OnServerEvent:Connect(function(player, part, cf, shouldRemove)
+replicatePhysics.OnServerEvent:Connect(function(player, part, cf, instant, shouldRemove)
 	if not shouldRemove then
 		local storage = replicationStorage[player]
 
@@ -37,6 +37,7 @@ replicatePhysics.OnServerEvent:Connect(function(player, part, cf, shouldRemove)
 				CFrame = cf,
 				PrevPart = part,
 				PrevCFrame = cf,
+				Instant = instant,
 			}
 
 			replicationStorage[player] = storage
@@ -44,11 +45,12 @@ replicatePhysics.OnServerEvent:Connect(function(player, part, cf, shouldRemove)
 
 		storage.Part = part
 		storage.CFrame = cf
+		storage.Instant = instant
 	else
 		replicationStorage[player] = nil
 	end
 
-	replicatePhysics:FireAllClients(player, part, cf, shouldRemove)
+	replicatePhysics:FireAllClients(player, part, cf, instant, shouldRemove)
 end)
 
 Players.PlayerRemoving:Connect(function(player)
@@ -59,8 +61,13 @@ local function onStep(dt)
 	for player, storage in pairs(replicationStorage) do
 		local cf = storage.CFrame
 
-		if storage.Part == storage.PrevPart then
-			cf = storage.PrevCFrame:Lerp(cf, 0.1*dt*60)
+		if not storage.Instant then
+			if storage.Part == storage.PrevPart then
+				cf = storage.PrevCFrame:Lerp(cf, 0.1*dt*60)
+			else
+				local prevCFrame = storage.Part.CFrame:ToObjectSpace(storage.PrevPart.CFrame * storage.PrevCFrame)
+				cf = prevCFrame:Lerp(cf, 0.1*dt*60)
+			end
 		end
 
 		storage.PrevPart = storage.Part

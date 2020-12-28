@@ -200,7 +200,7 @@ local function replicateStep(self, dt)
 	local t = os.clock()
 	if t - self._replicateTick >= CONSTANTS.REPLICATE_RATE then
 		local offset = self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
-		ReplicatePhysics:FireServer(self.Part, offset, false)
+		ReplicatePhysics:FireServer(self.Part, offset, false, false)
 		self._replicateTick = t
 	end
 end
@@ -221,7 +221,7 @@ local function setSeated(self, bool)
 		self._animation.ReplicatedHumanoid.Value = self.Humanoid
 		resetHumanoidStates(self.Humanoid)
 		setCollisionGroupId(self.Character:GetChildren(), 0)
-		ReplicatePhysics:FireServer(nil, nil, true)
+		ReplicatePhysics:FireServer(nil, nil, nil, true)
 		self.Humanoid:ChangeState(Enum.HumanoidStateType.Seated)
 	end
 
@@ -342,12 +342,18 @@ function WallstickClass:Set(part, normal, teleportCF)
 		camera.CFrame = self.Physics.HRP.CFrame:ToWorldSpace(cameraOffset)
 		camera.Focus = self.Physics.HRP.CFrame:ToWorldSpace(focusOffset)
 	end
+
+	if teleportCF then
+		local offset = self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
+		ReplicatePhysics:FireServer(self.Part, offset, true, false)
+		self._replicateTick = os.clock()
+	end
 end
 
 function WallstickClass:Destroy()
 	setCollisionGroupId(self.Character:GetChildren(), 0)
 	RunService:UnbindFromRenderStep("WallstickStep")
-	ReplicatePhysics:FireServer(nil, nil, true)
+	ReplicatePhysics:FireServer(nil, nil, nil, true)
 	SetCollidable:FireServer(true)
 	self.Maid:Sweep()
 end

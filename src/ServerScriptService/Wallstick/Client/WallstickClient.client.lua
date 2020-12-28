@@ -8,7 +8,7 @@ local ReplicatePhysics = Wallstick:WaitForChild("Remotes"):WaitForChild("Replica
 local myPlayer = Players.LocalPlayer
 local replicationStorage = {}
 
-ReplicatePhysics.OnClientEvent:Connect(function(player, part, cf, shouldRemove)
+ReplicatePhysics.OnClientEvent:Connect(function(player, part, cf, instant, shouldRemove)
 	if player == myPlayer then
 		return
 	end
@@ -22,6 +22,7 @@ ReplicatePhysics.OnClientEvent:Connect(function(player, part, cf, shouldRemove)
 				CFrame = cf,
 				PrevPart = part,
 				PrevCFrame = cf,
+				Instant = instant,
 			}
 
 			replicationStorage[player] = storage
@@ -29,6 +30,7 @@ ReplicatePhysics.OnClientEvent:Connect(function(player, part, cf, shouldRemove)
 
 		storage.Part = part
 		storage.CFrame = cf
+		storage.Instant = instant
 	else
 		replicationStorage[player] = nil
 	end
@@ -42,8 +44,13 @@ local function onStep(dt)
 	for player, storage in pairs(replicationStorage) do
 		local cf = storage.CFrame
 
-		if storage.Part == storage.PrevPart then
-			cf = storage.PrevCFrame:Lerp(cf, 0.1*dt*60)
+		if not storage.Instant then
+			if storage.Part == storage.PrevPart then
+				cf = storage.PrevCFrame:Lerp(cf, 0.1*dt*60)
+			else
+				local prevCFrame = storage.Part.CFrame:ToObjectSpace(storage.PrevPart.CFrame * storage.PrevCFrame)
+				cf = prevCFrame:Lerp(cf, 0.1*dt*60)
+			end
 		end
 
 		storage.PrevPart = storage.Part

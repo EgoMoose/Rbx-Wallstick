@@ -3,7 +3,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Tool = script.Parent
 local Mouse = Players.LocalPlayer:GetMouse()
 local WallstickClass = require(ReplicatedStorage:WaitForChild("Wallstick"))
 local wallstick = nil
@@ -52,16 +51,22 @@ local function onMouseDown()
 	end
 end
 
-Tool.Equipped:Connect(function()
+local module = {}
+
+module.Name = script.Name
+
+function module.equip()
 	wallstick = WallstickClass.new(Players.LocalPlayer)
 	wallstick.Maid:Mark(Mouse.Button1Down:Connect(onMouseDown))
 	wallstick.Maid:Mark(RunService.RenderStepped:Connect(function(dt)
 		updateTransition(wallstick.Part, dt)
 	end))
 	params.FilterDescendantsInstances = {wallstick.Character, wallstick.Physics.World}
-end)
+end
 
-Tool.Unequipped:Connect(function()
+function module.unequip()
 	wallstick:Destroy()
 	wallstick = nil
-end)
+end
+
+return module

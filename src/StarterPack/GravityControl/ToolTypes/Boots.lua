@@ -2,7 +2,6 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
-local Tool = script.Parent
 local WallstickClass = require(ReplicatedStorage:WaitForChild("Wallstick"))
 local wallstick = nil
 
@@ -72,7 +71,11 @@ local function onRenderStep(dt)
 	end
 end
 
-Tool.Equipped:Connect(function()
+local module = {}
+
+module.Name = script.Name
+
+function module.equip()
 	wallstick = WallstickClass.new(Players.LocalPlayer)
 	wallstick.Maid:Mark(RunService.Heartbeat:Connect(onHeartbeat))
 	wallstick.Maid:Mark(RunService.RenderStepped:Connect(onRenderStep))
@@ -81,10 +84,12 @@ Tool.Equipped:Connect(function()
 		isFalling = (distance < -50)
 	end))
 	params.FilterDescendantsInstances = {wallstick.Character, wallstick.Physics.World}
-end)
+end
 
-Tool.Unequipped:Connect(function()
+function module.unequip()
 	wallstick:Destroy()
 	wallstick = nil
 	renderStep = false
-end)
+end
+
+return module

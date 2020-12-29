@@ -10,13 +10,13 @@ local function setEquipped(module)
 	equipped = module
 	equipped.equip()
 
-	tool.Name = module.Name
+	tool.Name = "Equipped:\n" .. module.Name
 end
 
 local index = 1
 for i, module in pairs(script.Parent:WaitForChild("ToolTypes"):GetChildren()) do
 	toolTypes[i] = require(module)
-	if toolTypes[i].Name == "None" then
+	if toolTypes[i].Name == "Boots" then
 		index = i
 		setEquipped(toolTypes[i])
 	end

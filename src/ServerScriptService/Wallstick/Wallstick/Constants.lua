@@ -14,7 +14,7 @@ CONSTANTS.DEBUG_TRANSPARENCY = CONSTANTS.DEBUG and 0 or 1
 CONSTANTS.DEFAULT_CAMERA_MODE = CONSTANTS.DEBUG and "Debug" or "Custom" -- Custom or Default
 CONSTANTS.CUSTOM_CAMERA_SPIN = true -- if in custom camera match the part spin
 CONSTANTS.MAINTAIN_WORLD_VELOCITY = true -- maintains world space velocity when using the :Set() method
-CONSTANTS.PLAYER_COLLISIONS = false -- if you can collide with other players
+CONSTANTS.PLAYER_COLLISIONS = true -- if you can collide with other players
 
 CONSTANTS.IGNORE_CLASS_PART = {
 	["Terrain"] = true,

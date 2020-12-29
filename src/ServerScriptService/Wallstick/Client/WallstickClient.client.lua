@@ -32,6 +32,10 @@ ReplicatePhysics.OnClientEvent:Connect(function(player, part, cf, instant, shoul
 		storage.CFrame = cf
 		storage.Instant = instant
 	else
+		local character = player.Character
+		if character and character:FindFirstChild("HumanoidRootPart") then
+			character.HumanoidRootPart.Anchored = false
+		end
 		replicationStorage[player] = nil
 	end
 end)
@@ -58,6 +62,7 @@ local function onStep(dt)
 		
 		local character = player.Character
 		if character and character:FindFirstChild("HumanoidRootPart") then
+			character.HumanoidRootPart.Anchored = true
 			character.HumanoidRootPart.CFrame = storage.Part.CFrame * cf
 		end 
 	end

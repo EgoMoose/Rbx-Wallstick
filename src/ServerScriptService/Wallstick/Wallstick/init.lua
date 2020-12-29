@@ -1,5 +1,6 @@
 -- CONSTANTS
 
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local CONSTANTS = require(script:WaitForChild("Constants"))
@@ -115,6 +116,14 @@ local function collisionStep(self, dt)
 			physicsPart.CFrame = floorCF:ToWorldSpace(stickPartCF:ToObjectSpace(part.CFrame))
 			physicsPart.CanCollide = part.CanCollide
 
+			if physicsPart.Name == "CharacterPart" then
+				if not CONSTANTS.PLAYER_COLLISIONS then
+					physicsPart.CanCollide = false
+				else
+					physicsPart.CanCollide = CONSTANTS.CHARACTER_COLLISION_PART_NAMES[part.Name]
+				end
+			end
+
 			newCollisionParts[part] = physicsPart
 		elseif part ~= stickPart and part.CanCollide then
 			local physicsPart
@@ -124,8 +133,28 @@ local function collisionStep(self, dt)
 				physicsPart.CanCollide = part.CanCollide
 				physicsPart.Size = part.Size
 			else
-				physicsPart = part:Clone()
-				physicsPart:ClearAllChildren()
+				local character = CONSTANTS.CHARACTER_PART_NAMES[part.Name] and part.Parent
+				local player = Players:GetPlayerFromCharacter(character)
+
+				if player then
+					physicsPart = Instance.new("Part")
+					physicsPart.Name = "CharacterPart"
+					physicsPart.Size = part.Size
+
+					if not CONSTANTS.PLAYER_COLLISIONS then
+						physicsPart.CanCollide = false
+					else
+						physicsPart.CanCollide = CONSTANTS.CHARACTER_COLLISION_PART_NAMES[part.Name]
+					end
+
+					if part.CollisionGroupId == CONSTANTS.PHYSICS_ID then
+						physicsPart.CollisionGroupId = 0
+					end
+				else
+					physicsPart = part:Clone()
+					physicsPart.Name = "Part"
+					physicsPart:ClearAllChildren()
+				end
 			end
 
 			physicsPart.Transparency = CONSTANTS.DEBUG_TRANSPARENCY

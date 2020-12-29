@@ -13,6 +13,8 @@ local function setEquipped(module)
 	tool.Name = "Equipped:\n" .. module.Name
 end
 
+wait()
+
 local index = 1
 for i, module in pairs(script.Parent:WaitForChild("ToolTypes"):GetChildren()) do
 	toolTypes[i] = require(module)

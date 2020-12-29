@@ -69,3 +69,4 @@ local function onStep(dt)
 end
 
 RunService.RenderStepped:Connect(onStep)
+--RunService.Heartbeat:Connect(onStep)

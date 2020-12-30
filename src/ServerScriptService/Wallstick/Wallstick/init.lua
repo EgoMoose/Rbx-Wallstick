@@ -227,7 +227,7 @@ end
 
 local function replicateStep(self, dt)
 	local t = os.clock()
-	if t - self._replicateTick >= CONSTANTS.REPLICATE_RATE then
+	if CONSTANTS.SEND_REPLICATION and t - self._replicateTick >= CONSTANTS.REPLICATE_RATE then
 		local offset = self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
 		ReplicatePhysics:FireServer(self.Part, offset, false, false)
 		self._replicateTick = t

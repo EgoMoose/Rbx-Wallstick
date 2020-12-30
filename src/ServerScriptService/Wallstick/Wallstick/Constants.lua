@@ -6,6 +6,7 @@ CONSTANTS.WORLD_CENTER = CFrame.new(10000, 0, 0)
 CONSTANTS.COLLIDER_SIZE2 = Vector3.new(32, 32, 32)
 CONSTANTS.PHYSICS_ID = PhysicsService:GetCollisionGroupId("WallstickCharacters")
 
+CONSTANTS.SEND_REPLICATION = true -- only disable if only using wallstick on the client
 CONSTANTS.REPLICATE_RATE = 0.1 -- send an update every x seconds
 
 CONSTANTS.DEBUG = false

@@ -46,6 +46,10 @@ end)
 
 local function onStep(dt)
 	for player, storage in pairs(replicationStorage) do
+		if not storage.Part then
+			return
+		end
+
 		local cf = storage.CFrame
 
 		if not storage.Instant then

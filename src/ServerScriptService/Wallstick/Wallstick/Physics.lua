@@ -40,6 +40,7 @@ function PhysicsClass.new(wallstick)
 	self.HRP = self.Humanoid.RootPart
 	
 	self.Gyro = Instance.new("BodyGyro")
+	self.Gyro.D = 0
 	self.Gyro.MaxTorque = Vector3.new(100000, 100000, 100000)
 	self.Gyro.P = 25000
 
@@ -100,6 +101,12 @@ function PhysicsClass:UpdateGyro()
 
 	self.Gyro.CFrame = CFrame.lookAt(physicsHRPCF.p, physicsHRPCF.p + physicsCameraCF.LookVector * VEC_XZ)
 	self.Gyro.Parent = isRelative and self.Wallstick.Physics.HRP or nil
+	
+	if isRelative then
+		self.Humanoid.AutoRotate = false
+	else
+		self.Humanoid.AutoRotate = self.Wallstick.Humanoid.AutoRotate
+	end
 end
 
 function PhysicsClass:UpdateFloor(prevPart, newPart, prevNormal, newNormal)

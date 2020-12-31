@@ -15,6 +15,7 @@ require(Server:WaitForChild("Collisions"))
 require(Server:WaitForChild("Remotes"))
 
 replace(Client:WaitForChild("PlayerScriptsLoader"), StarterPlayerScripts)
+replace(Client:WaitForChild("RbxCharacterSounds"), StarterPlayerScripts)
 replace(Client:WaitForChild("WallstickClient"), StarterPlayerScripts)
 replace(Client:WaitForChild("Animate"), StarterCharacterScripts)
 

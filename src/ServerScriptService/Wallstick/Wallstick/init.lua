@@ -75,14 +75,6 @@ local function getRotationBetween(u, v, axis)
 	return CFrame.new(0, 0, 0, uxv.x, uxv.y, uxv.z, 1 + dot)
 end
 
-local function resetHumanoidStates(humanoid)
-	for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
-		if enum ~= Enum.HumanoidStateType.None then
-			humanoid:SetStateEnabled(enum, true)
-		end
-	end
-end
-
 local function generalStep(self, dt)
 	self.HRP.Velocity = ZERO3
 	self.HRP.RotVelocity = ZERO3
@@ -213,16 +205,6 @@ local function characterStep(self, dt)
 	local physicsHRPCF = self.Physics.HRP.CFrame
 	self.HRP.Velocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.Velocity))
 	self.HRP.RotVelocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
-
-	for _, enum in pairs(Enum.HumanoidStateType:GetEnumItems()) do
-		if not CONSTANTS.IGNORE_STATES[enum] then
-			self.Humanoid:SetStateEnabled(enum, false)
-		end
-	end
-
-	local targetState = self.Physics.Humanoid:GetState()
-	self.Humanoid:SetStateEnabled(targetState, true)
-	self.Humanoid:ChangeState(targetState)
 end
 
 local function replicateStep(self, dt)
@@ -243,12 +225,12 @@ local function setSeated(self, bool)
 		self.Physics.HRP.Anchored = false
 		self._animation.ReplicatedHumanoid.Value = self.Physics.Humanoid
 		setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
+		self.Humanoid.PlatformStand = true
 		self:Set(self.Part, self.Normal)
 	else
 		self:Set(self.Humanoid.SeatPart, UNIT_Y)
 		self.Physics.HRP.Anchored = true
 		self._animation.ReplicatedHumanoid.Value = self.Humanoid
-		resetHumanoidStates(self.Humanoid)
 		setCollisionGroupId(self.Character:GetChildren(), 0)
 		ReplicatePhysics:FireServer(nil, nil, nil, true)
 		self.Humanoid:ChangeState(Enum.HumanoidStateType.Seated)
@@ -261,6 +243,7 @@ function init(self)
 	setCollisionGroupId(self.Character:GetChildren(), CONSTANTS.PHYSICS_ID)
 	SetCollidable:FireServer(false)
 
+	self.Humanoid.PlatformStand = true
 	self:SetMode(CONSTANTS.DEFAULT_CAMERA_MODE)
 	self:Set(workspace.Terrain, UNIT_Y)
 
@@ -289,10 +272,6 @@ function init(self)
 			self._fallStart = self.Physics.HRP.Position.y
 		end
 	end))
-
-	self.Maid:Mark(function()
-		resetHumanoidStates(self.Humanoid)
-	end)
 
 	RunService:BindToRenderStep("WallstickStep", Enum.RenderPriority.Camera.Value - 1, function(dt)
 		if self._seated then
@@ -380,6 +359,7 @@ function WallstickClass:Set(part, normal, teleportCF)
 end
 
 function WallstickClass:Destroy()
+	self.Humanoid.PlatformStand = false
 	setCollisionGroupId(self.Character:GetChildren(), 0)
 	RunService:UnbindFromRenderStep("WallstickStep")
 	ReplicatePhysics:FireServer(nil, nil, nil, true)

@@ -149,6 +149,7 @@ local function collisionStep(self, dt)
 				end
 			end
 
+			physicsPart.CFrame = floorCF:ToWorldSpace(stickPartCF:ToObjectSpace(part.CFrame))
 			physicsPart.Transparency = CONSTANTS.DEBUG_TRANSPARENCY
 			physicsPart.Anchored = true
 			physicsPart.CastShadow = false

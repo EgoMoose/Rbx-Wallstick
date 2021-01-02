@@ -49,6 +49,7 @@ function WallstickClass.new(player)
 	self._fallStart = 0
 
 	self.Maid = Maid.new()
+	self.Changed = Signal.new()
 
 	self.Part = nil
 	self.Normal = UNIT_Y
@@ -321,6 +322,9 @@ function WallstickClass:Set(part, normal, teleportCF)
 	local vel = physicsHRP.CFrame:VectorToObjectSpace(physicsHRP.Velocity)
 	local rotVel = physicsHRP.CFrame:VectorToObjectSpace(physicsHRP.RotVelocity)
 
+	local oldPart = self.Part
+	local oldNormal = self.Normal
+
 	self.Physics:UpdateFloor(self.Part, part, self.Normal, normal)
 	self.Part = part
 	self.Normal = normal
@@ -357,6 +361,8 @@ function WallstickClass:Set(part, normal, teleportCF)
 		ReplicatePhysics:FireServer(self.Part, offset, true, false)
 		self._replicateTick = os.clock()
 	end
+
+	self.Changed:Fire(oldPart, oldNormal, part, normal)
 end
 
 function WallstickClass:Destroy()

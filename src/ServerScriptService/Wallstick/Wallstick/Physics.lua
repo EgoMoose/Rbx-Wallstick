@@ -34,6 +34,7 @@ function PhysicsClass.new(wallstick)
 	self.Collision.Parent = self.World
 
 	self.Floor = nil
+	self._floorResized = nil
 	
 	self.Character = stripCopyCharacter(wallstick.Player.Character)
 	self.Humanoid = self.Character:WaitForChild("Humanoid")
@@ -135,10 +136,22 @@ function PhysicsClass:UpdateFloor(prevPart, newPart, prevNormal, newNormal)
 	floor.CFrame = CONSTANTS.WORLD_CENTER * getRotationBetween(newNormal, UNIT_Y, UNIT_X)
 	floor.Parent = self.World
 
+	if self._floorResized then
+		self._floorResized:Disconnect()
+	end
+
+	self._floorResized = newPart:GetPropertyChangedSignal("Size"):Connect(function()
+		floor.Size = newPart.Size
+	end)
+
 	self.Floor = floor
 end
 
 function PhysicsClass:Destroy()
+	if self._floorResized then
+		self._floorResized:Disconnect()
+		self._floorResized = nil
+	end
 	self.World:Destroy()
 	self.Gyro:Destroy()
 end

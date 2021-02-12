@@ -90,7 +90,6 @@ end
 function PhysicsClass:MatchHumanoid(humanoid)
 	self.Humanoid.WalkSpeed = humanoid.WalkSpeed
 	self.Humanoid.JumpPower = humanoid.JumpPower
-	self.Humanoid.Jump = humanoid.Jump
 end
 
 function PhysicsClass:UpdateGyro()

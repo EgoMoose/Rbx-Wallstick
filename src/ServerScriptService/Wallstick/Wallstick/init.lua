@@ -259,6 +259,12 @@ function init(self)
 		setSeated(self, not not self.Humanoid.SeatPart)
 	end))
 
+	self.Maid:Mark(self.Humanoid:GetPropertyChangedSignal("Jump"):Connect(function()
+		if self.Humanoid.Jump then
+			self.Physics.Humanoid.Jump = true
+		end
+	end))
+
 	self.Maid:Mark(self.Humanoid.Died:Connect(function()
 		self:Destroy()
 	end))

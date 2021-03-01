@@ -76,18 +76,36 @@ local function getRotationBetween(u, v, axis)
 	return CFrame.new(0, 0, 0, uxv.x, uxv.y, uxv.z, 1 + dot)
 end
 
-local function generalStep(self, dt)
-	self.HRP.Velocity = ZERO3
-	self.HRP.RotVelocity = ZERO3
-	self.HRP.CFrame = self.Part.CFrame * self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
+local function moveCharacter(self)
+	local move = self._control:GetMoveVector()
+	
+	if self.Mode ~= "Debug" then
+		local cameraCF = workspace.Camera.CFrame
+		local physicsCameraCF = self.Physics.HRP.CFrame * self.HRP.CFrame:ToObjectSpace(cameraCF)
 
-	if not self.Part:IsDescendantOf(workspace) then
-		self:Set(workspace.Terrain, UNIT_Y)
+		local c, s
+		local _, _, _, R00, R01, R02, _, R11, R12, _, _, R22 =  physicsCameraCF:GetComponents()
+		local q = math.sign(R11)
+
+		if R12 < 1 and R12 > -1 then
+			c = R22
+			s = R02
+		else
+			c = R00
+			s = -R01*math.sign(R12)
+		end
+		
+		local norm = math.sqrt(c*c + s*s)
+		move = Vector3.new(
+			(c*move.x*q + s*move.z)/norm,
+			0,
+			(c*move.z - s*move.x*q)/norm
+		)
+	
+		self.Physics.Humanoid:Move(move, false)
+	else
+		self.Physics.Humanoid:Move(move, true)
 	end
-
-	self.Physics:MatchHumanoid(self.Humanoid)
-	self.Physics:UpdateGyro()
-	self._camera:SetUpVector(self.Part.CFrame:VectorToWorldSpace(self.Normal))
 end
 
 local function collisionStep(self, dt)
@@ -173,42 +191,6 @@ local function collisionStep(self, dt)
 	end
 end
 
-local function characterStep(self, dt)
-	local move = self._control:GetMoveVector()
-	
-	if self.Mode ~= "Debug" then
-		local cameraCF = workspace.Camera.CFrame
-		local physicsCameraCF = self.Physics.HRP.CFrame * self.HRP.CFrame:ToObjectSpace(cameraCF)
-
-		local c, s
-		local _, _, _, R00, R01, R02, _, R11, R12, _, _, R22 =  physicsCameraCF:GetComponents()
-		local q = math.sign(R11)
-
-		if R12 < 1 and R12 > -1 then
-			c = R22
-			s = R02
-		else
-			c = R00
-			s = -R01*math.sign(R12)
-		end
-		
-		local norm = math.sqrt(c*c + s*s)
-		move = Vector3.new(
-			(c*move.x*q + s*move.z)/norm,
-			0,
-			(c*move.z - s*move.x*q)/norm
-		)
-	
-		self.Physics.Humanoid:Move(move, false)
-	else
-		self.Physics.Humanoid:Move(move, true)
-	end
-
-	local physicsHRPCF = self.Physics.HRP.CFrame
-	self.HRP.Velocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.Velocity))
-	self.HRP.RotVelocity = self.HRP.CFrame:VectorToWorldSpace(physicsHRPCF:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
-end
-
 local function replicateStep(self, dt)
 	local t = os.clock()
 	if CONSTANTS.SEND_REPLICATION and t - self._replicateTick >= CONSTANTS.REPLICATE_RATE then
@@ -281,21 +263,38 @@ function init(self)
 		end
 	end))
 
+	self.Maid:Mark(RunService.Heartbeat:Connect(function(dt)
+		self.HRP.Velocity = ZERO3
+		self.HRP.RotVelocity = ZERO3
+		self.HRP.CFrame = self.Part.CFrame * self.Physics.Floor.CFrame:ToObjectSpace(self.Physics.HRP.CFrame)
+
+		if not self.Part:IsDescendantOf(workspace) then
+			self:Set(workspace.Terrain, UNIT_Y)
+		end
+
+		self.Physics:MatchHumanoid(self.Humanoid)
+		self.Physics:UpdateGyro()
+
+		collisionStep(self, dt)
+		replicateStep(self, dt)
+
+		self.HRP.Velocity = self.HRP.CFrame:VectorToWorldSpace(self.Physics.HRP.CFrame:VectorToObjectSpace(self.Physics.HRP.Velocity))
+		self.HRP.RotVelocity = self.HRP.CFrame:VectorToWorldSpace(self.Physics.HRP.CFrame:VectorToObjectSpace(self.Physics.HRP.RotVelocity))
+
+		local height, distance = self:GetFallHeight()
+		if height <= workspace.FallenPartsDestroyHeight then
+			self:Destroy()
+		end
+	end))
+
 	RunService:BindToRenderStep("WallstickStep", Enum.RenderPriority.Camera.Value - 1, function(dt)
 		if self._seated then
 			self._camera:SetUpVector(self.HRP.CFrame.YVector)
 			return
 		end
 
-		generalStep(self, dt)
-		collisionStep(self, dt)
-		characterStep(self, dt)
-		replicateStep(self, dt)
-
-		local height, distance = self:GetFallHeight()
-		if height <= workspace.FallenPartsDestroyHeight then
-			self:Destroy()
-		end
+		self._camera:SetUpVector(self.Part.CFrame:VectorToWorldSpace(self.Normal))
+		moveCharacter(self)
 	end)
 end
 
